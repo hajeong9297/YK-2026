@@ -31,9 +31,11 @@ try:
     data_list = inventory_list[1:]
 
     # 인화성(Flammability, 5번째 컬럼)을 기준으로 내림차순 정렬
-    # float()을 사용하여 문자열을 숫자로 변환 후 비교
-    # float(x[4]): 문자열 → 숫자로 변환
+    # data_list.sort(): 리스트를 정렬하는 함수 → 그냥 쓰면 기본 오름차순 정렬
     # lambda x: 정렬 기준을 정하는 함수
+    # float(x[4]): 문자열 → 숫자로 변환
+    # float()을 사용하여 문자열을 숫자로 변환 후 비교
+    # x는 리스트 안에 있는 한 줄 데이터를 뜻함 (x = ['Gasoline', '0.74', '0.74', 'Very weak', '0.91'])
     data_list.sort(key = lambda x: float(x[4]), reverse = True)
 
     # 인화성 지수가 0.7 이상인 데이터만 저장할 리스트 생성
