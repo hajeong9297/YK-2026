@@ -43,6 +43,8 @@ try:
     danger_list = []
 
     # 조건에 맞는 데이터 필터링
+    # item: 반복문에서 꺼낸 한 줄 데이터 (item = ['Gasoline', '0.74', '0.74', 'Very weak', '0.91'])
+    # append(): 리스트에 값을 추가하는 함수 (리스트.append(값))  리스트 맨 뒤에 값을 넣는다
     for item in data_list:
         if float(item[4]) >= 0.7:
             danger_list.append(item)
