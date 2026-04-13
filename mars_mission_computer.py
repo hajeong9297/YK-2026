@@ -1,101 +1,81 @@
-import time
+# 운영체제 및 시스템 정보를 가져오기 위한 모듈
+import platform
+
+# CPU 코어 수를 가져오기 위한 모듈
+import os
+
+# 데이터를 JSON 형식으로 출력하기 위한 모듈
+import json
+
+# 메모리, CPU 사용량 등 시스템 정보를 가져오기 위한 모듈
+import psutil
 
 
-# 더미 센서 클래스 (가짜 센서)
-class DummySensor:
-
-    def __init__(self):
-        self.env_values = {
-            'mars_base_internal_temperature': 0,
-            'mars_base_external_temperature': 0,
-            'mars_base_internal_humidity': 0,
-            'mars_base_external_illuminance': 0,
-            'mars_base_internal_co2': 0,
-            'mars_base_internal_oxygen': 0
-        }
-
-    # 값이 계속 변하도록 설정 (테스트용)
-    def set_env(self):
-        self.env_values['mars_base_internal_temperature'] += 1
-        self.env_values['mars_base_external_temperature'] -= 1
-        self.env_values['mars_base_internal_humidity'] += 1
-        self.env_values['mars_base_external_illuminance'] += 5
-        self.env_values['mars_base_internal_co2'] += 1
-        self.env_values['mars_base_internal_oxygen'] -= 1
-
-    # 현재 값 반환
-    def get_env(self):
-        self.set_env()
-        return self.env_values
-
-
-# 미션 컴퓨터 클래스
+# MissionComputer 클래스 정의 (미션 컴퓨터를 표현하는 클래스)
 class MissionComputer:
 
-    def __init__(self):
+    # 시스템 기본 정보를 가져오는 메소드
+    def get_mission_computer_info(self):
+        # 시스템 정보를 가져오는 과정에서 오류가 발생할 수 있으므로 예외 처리
+        try:
+            # 시스템 정보를 딕셔너리 형태로 저장
+            computer_info = {
+                # 현재 운영체제 이름 (예: Windows, Linux 등)
+                'operating_system': platform.system(),
 
-        # 현재 환경값 저장
-        self.env_values = {
-            'mars_base_internal_temperature': 0,
-            'mars_base_external_temperature': 0,
-            'mars_base_internal_humidity': 0,
-            'mars_base_external_illuminance': 0,
-            'mars_base_internal_co2': 0,
-            'mars_base_internal_oxygen': 0
-        }
+                # 운영체제 버전 정보
+                'operating_system_version': platform.version(),
 
-        # 센서 연결
-        self.ds = DummySensor()
+                # CPU 타입 정보
+                'cpu_type': platform.processor(),
 
-        # 평균 계산용 데이터 저장
-        self.history = {
-            'mars_base_internal_temperature': [],
-            'mars_base_external_temperature': [],
-            'mars_base_internal_humidity': [],
-            'mars_base_external_illuminance': [],
-            'mars_base_internal_co2': [],
-            'mars_base_internal_oxygen': []
-        }
+                # CPU 코어 개수 (예: 4, 8, 16 등)
+                'cpu_core_count': os.cpu_count(),
 
-    def get_sensor_data(self):
+                # 전체 메모리 크기를 GB 단위로 변환하고 소수점 2자리까지 표시
+                'memory_size_gb': round(
+                    psutil.virtual_memory().total / (1024 ** 3), 2
+                )
+            }
 
-        count = 0  # 반복 횟수 (5초 × 60 = 5분)
+            # 위에서 만든 딕셔너리를 JSON 형식으로 변환하여 출력
+            print(json.dumps(computer_info, indent = 4))
 
-        while True:
-
-            # 🔥 1. 센서값 먼저 출력 (이게 핵심 수정!)
-            sensor_data = self.ds.get_env()
-            self.env_values = sensor_data
-            print(self.env_values)
-
-            # 🔥 2. 평균 계산용 데이터 저장
-            for key in self.env_values:
-                self.history[key].append(self.env_values[key])
-
-            count += 1
-
-            # 🔥 3. 5분마다 평균 출력
-            if count == 60:
-                print('----- 5분 평균 값 -----')
-                for key in self.history:
-                    values = self.history[key]
-                    avg = sum(values) / len(values)
-                    print(key, ':', avg)
-
-                # 초기화
-                self.history = {key: [] for key in self.history}
-                count = 0
-
-            # 🔥 4. 종료 입력
-            user_input = input('종료하려면 q 입력 (계속하려면 Enter): ')
-            if user_input == 'q':
-                print('Sytem stoped....')
-                break
-
-            # 🔥 5. 5초 대기
-            time.sleep(5)
+        # 오류 발생 시 실행되는 부분
+        except Exception as e:
+            print('시스템 정보를 가져오는 중 오류가 발생했습니다.')
+            print(e)
 
 
-# 실행
-RunComputer = MissionComputer()
-RunComputer.get_sensor_data()
+    # 시스템 부하(CPU, 메모리 사용량)를 가져오는 메소드
+    def get_mission_computer_load(self):
+        # 시스템 부하 정보도 오류 가능성이 있으므로 예외 처리
+        try:
+            # CPU 및 메모리 사용량을 딕셔너리 형태로 저장
+            computer_load = {
+                # CPU 실시간 사용량 (%) - 1초 동안 측정된 평균값
+                'cpu_usage_percent': psutil.cpu_percent(interval = 1),
+
+                # 메모리 사용량 (%)
+                'memory_usage_percent': psutil.virtual_memory().percent
+            }
+
+            # JSON 형식으로 변환하여 출력
+            print(json.dumps(computer_load, indent = 4))
+
+        # 오류 발생 시 실행
+        except Exception as e:
+            print('시스템 부하 정보를 가져오는 중 오류가 발생했습니다.')
+            print(e)
+
+
+# ---------------- 실행 부분 ----------------
+
+# MissionComputer 클래스를 이용하여 객체 생성
+runComputer = MissionComputer()
+
+# 시스템 기본 정보 출력
+runComputer.get_mission_computer_info()
+
+# 시스템 부하 정보 출력
+runComputer.get_mission_computer_load()
